@@ -1,0 +1,9 @@
+# Dev / CI dependencies for scripts/validate.py
+#   pip install -r requirements-dev.txt
+#
+# pyshacl is REQUIRED for the SHACL portion of validation. Without it,
+# validate.py degrades gracefully and skips SHACL -- which is exactly how a
+# regression slipped through once. Keeping it here ensures CI runs the SHACL
+# checks and fails on a violation.
+rdflib>=7.0
+pyshacl>=0.29

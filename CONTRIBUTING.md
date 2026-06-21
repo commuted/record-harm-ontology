@@ -78,8 +78,10 @@ cd record-harm-ontology
 
 2. **Install dependencies**
 ```bash
-pip install rdflib pyshacl
+pip install -r requirements-dev.txt
 ```
+(This includes `pyshacl`, which `scripts/validate.py` needs to run the SHACL
+checks — without it those checks are skipped. CI installs the same file.)
 
 3. **Validate the ontology**
 ```bash
