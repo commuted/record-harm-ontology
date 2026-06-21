@@ -86,20 +86,24 @@ SELECT ?harm ?label WHERE {
 }
 ```
 
-### Compute Dependency Depth
+### Count Underlying Prime Harms
+
+Counts the distinct prime harms in each composite's transitive closure (how many
+primes it ultimately rests on) — not path depth / longest chain, which would need
+a recursive longest-path query.
 
 ```sparql
 PREFIX ex: <http://example.org/record-harm-ontology#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?harm ?label (COUNT(?intermediate) as ?depth) WHERE {
+SELECT ?harm ?label (COUNT(DISTINCT ?prime) as ?primeCount) WHERE {
     ?harm a ex:CompositeHarm ;
           rdfs:label ?label ;
-          ex:buildsUpon+ ?intermediate .
-    ?intermediate a ex:PrimeHarm .
+          ex:buildsUpon+ ?prime .
+    ?prime a ex:PrimeHarm .
 }
 GROUP BY ?harm ?label
-ORDER BY DESC(?depth)
+ORDER BY DESC(?primeCount)
 ```
 
 ## Event Queries
