@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0] - 2026-06-20
 
+### Added
+- **`ex:Agent` class**: the example data typed perpetrators with an undeclared class.
+  Declared it as `ex:Agent` — matching the cross-vocabulary standard (`foaf:Agent`,
+  `prov:Agent`, `dcterms:Agent`) rather than the original "Actor". A lightweight class
+  for agents; `ex:perpetrator`'s range stays open (`owl:Thing`) for FOAF/PROV-O interop.
+  The worked example types `ex:SomeAgent`/`ex:UnknownAgent` as `ex:Agent`.
+
 ### Fixed
 - **OWL 2 DL profile compliance**: removed `owl:TransitiveProperty` from `ex:buildsUpon`.
   Since v2.0 the property was simultaneously transitive, asymmetric, irreflexive, and
@@ -21,6 +28,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transitive dependency chains are now obtained via the SPARQL property path `ex:buildsUpon+`
   (already used in `docs/QUERIES.md`) rather than reasoner materialization. No query results change.
 - Updated README and `docs/ARCHITECTURE.md` to document the simple-property rationale.
+- `ex:ofType` declared `owl:FunctionalProperty` (DL-safe; matches the "exactly one harm type"
+  intent and the `ARCHITECTURE.md` description). SHACL `HarmEventShape` remains the hard
+  exactly-one check.
+- `docs/QUERIES.md`: relabeled "Compute Dependency Depth" → "Count Underlying Prime Harms"
+  (it counts distinct primes in the closure, not path depth).
+- `scripts/validate.py`: now validates the examples file against the shapes, adds a targeted
+  OWL 2 DL simple-property profile check (regression guard for the transitivity defect), and
+  degrades gracefully when `pyshacl` is absent.
+
+### Notes
+- The base namespace remains the `example.org` placeholder; migrating to a permanent,
+  dereferenceable IRI is tracked as a deliberate v3.0 breaking change (see TODO in the ontology).
 
 ## [2.2.0] - 2026-06-20
 

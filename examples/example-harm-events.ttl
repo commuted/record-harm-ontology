@@ -27,18 +27,18 @@ ex:MeetingMinutes2026_05_10 a ex:Record ;
     dc:created "2026-05-10"^^xsd:date ;
     dc:description "Official minutes from quarterly board meeting" .
 
-# ---- Example Actors ----
+# ---- Example Agents ----
 
-ex:JohnDoe a ex:Actor ;
+ex:JohnDoe a ex:Agent ;
     rdfs:label "John Doe" ;
     rdfs:comment "Former IT administrator" .
 
-ex:JaneSmith a ex:Actor ;
+ex:JaneSmith a ex:Agent ;
     rdfs:label "Jane Smith" ;
     rdfs:comment "External consultant" .
 
-ex:UnknownActor a ex:Actor ;
-    rdfs:label "Unknown Actor" ;
+ex:UnknownAgent a ex:Agent ;
+    rdfs:label "Unknown Agent" ;
     rdfs:comment "Identity not determined" .
 
 # ---- Example Harm Events ----
@@ -66,7 +66,7 @@ ex:Event003_Suppression a ex:HarmEvent ;
     ex:ofType ex:Suppression ;
     ex:harms ex:MeetingMinutes2026_05_10 ;
     dc:date "2026-05-12"^^xsd:date ;
-    ex:perpetrator ex:UnknownActor ;
+    ex:perpetrator ex:UnknownAgent ;
     ex:severity 7 ;
     rdfs:comment "Meeting minutes were moved to restricted access folder, preventing normal circulation to stakeholders." .
 
@@ -109,7 +109,7 @@ ex:Event007_Repudiation a ex:HarmEvent ;
     ex:ofType ex:Repudiation ;
     ex:harms ex:ContractDoc2026 ;
     dc:date "2026-05-20"^^xsd:date ;
-    ex:perpetrator ex:JaneSmith , ex:UnknownActor ;
+    ex:perpetrator ex:JaneSmith , ex:UnknownAgent ;
     ex:severity 7 ;
     rdfs:comment "Multiple parties jointly disavowed contract terms. Demonstrates multi-perpetrator scenario." .
 

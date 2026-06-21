@@ -6,6 +6,12 @@
 @prefix dc:   <http://purl.org/dc/terms/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
+# TODO [namespace]: the base IRI http://example.org/record-harm-ontology# is an
+# RFC 2606 placeholder -- non-resolvable and unowned. Before this ontology has
+# external adopters, migrate to a persistent, dereferenceable base (e.g.
+# https://w3id.org/record-harm#). That rewrites every ex: IRI, so it is a
+# deliberate v3.0 BREAKING change, not a minor edit -- handle it on its own.
+
 # ============================================
 # Record Harm Ontology v2
 # ============================================
@@ -95,6 +101,11 @@
 #    CompositeHarm membership working. Transitive closure is unaffected for
 #    querying: use the SPARQL property path ex:buildsUpon+ (see QUERIES.md);
 #    it is simply computed on demand rather than materialized by the reasoner.
+#  - ex:Agent class added. The example data (and examples/example-harm-events.ttl)
+#    typed perpetrators with an undeclared class; declare it, using the
+#    cross-vocabulary standard name "Agent" (cf. foaf:Agent, prov:Agent,
+#    dcterms:Agent) rather than the original "Actor". ex:perpetrator's range
+#    stays open for FOAF/PROV-O interop.
 
 ex:RecordHarmOntology a owl:Ontology ;
     dc:title "Record Harm Ontology" ;
@@ -110,6 +121,10 @@ ex:RecordHarmOntology a owl:Ontology ;
 ex:Record a owl:Class ;
     rdfs:label "Record" ;
     rdfs:comment "Any informational artifact (document, data, log, etc.) that serves as evidence or representation of events, facts, actions, or states of affairs. The central entity being harmed." .
+
+ex:Agent a owl:Class ;
+    rdfs:label "Agent" ;
+    rdfs:comment "[v2.3] An agent (person, organization, or system) that can perpetrate a HarmEvent. A deliberately lightweight placeholder so example data has something to type perpetrators with instead of bare owl:Thing. Named to match the cross-vocabulary standard (foaf:Agent, prov:Agent, dcterms:Agent). ex:perpetrator's range is intentionally NOT narrowed to this class -- if you integrate one of those vocabularies, type agents as foaf:Agent / prov:Agent instead and this class can be dropped or aligned via rdfs:subClassOf." .
 
 ex:RecordHarm a owl:Class ;
     rdfs:label "Record Harm" ;
@@ -171,16 +186,16 @@ ex:isBuiltUponBy a owl:ObjectProperty ;
     rdfs:label "is built upon by" ;
     rdfs:comment "[v2.2] Inverse of ex:buildsUpon, e.g. for querying 'what composites depend on Omission' without a property path." .
 
-ex:ofType a owl:ObjectProperty ;
+ex:ofType a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:domain ex:HarmEvent ;
     rdfs:range ex:RecordHarm ;
     rdfs:label "of type" ;
-    rdfs:comment "[v2.2] Links a HarmEvent to the harm-type individual it instantiates, e.g. a specific destruction event ex:ofType ex:Destruction." .
+    rdfs:comment "[v2.2] Links a HarmEvent to the harm-type individual it instantiates, e.g. a specific destruction event ex:ofType ex:Destruction. [v2.3] Declared owl:FunctionalProperty: a HarmEvent instantiates at most one harm type. DL-safe (ofType is simple/non-transitive). Note this gives OWL 'at most one' semantics -- a DL reasoner would treat two differing ofType values as owl:sameAs rather than an error; the hard 'exactly one' mistake-catch is the maxCount/minCount in HarmEventShape (record-harm-shapes.ttl)." .
 
 ex:perpetrator a owl:ObjectProperty ;
     rdfs:domain ex:HarmEvent ;
     rdfs:label "perpetrator" ;
-    rdfs:comment "[v2.2] The actor responsible for a HarmEvent. Range deliberately left open (owl:Thing) -- if this ontology is ever combined with an agent vocabulary such as FOAF or PROV-O, range it to foaf:Agent or prov:Agent rather than reinventing one here." .
+    rdfs:comment "[v2.2] The actor responsible for a HarmEvent. Range deliberately left open (owl:Thing) -- if this ontology is ever combined with an agent vocabulary such as FOAF or PROV-O, range it to foaf:Agent or prov:Agent rather than reinventing one here. [v2.3] Example data types perpetrators as ex:Agent, a lightweight class provided for that purpose; the open range still permits any agent type." .
 
 ex:severity a owl:DatatypeProperty ;
     rdfs:domain ex:HarmEvent ;
@@ -406,7 +421,7 @@ ex:SomeSpecificRecord a ex:Record ;
     rdfs:label "Example: Q2 audit log" ;
     rdfs:comment "[v2.2] Placeholder Record individual for the worked HarmEvent example below. Replace with real records in actual use." .
 
-ex:SomeActor a owl:Thing ;
+ex:SomeAgent a ex:Agent ;
     rdfs:label "Example perpetrator" .
 
 ex:exampleDestructionEvent a ex:HarmEvent ;
@@ -414,7 +429,7 @@ ex:exampleDestructionEvent a ex:HarmEvent ;
     ex:ofType ex:Destruction ;
     ex:harms ex:SomeSpecificRecord ;
     dc:date "2026-06-15"^^xsd:date ;
-    ex:perpetrator ex:SomeActor ;
+    ex:perpetrator ex:SomeAgent ;
     ex:severity 8 .
 
 ex:CoverUpPattern a ex:HarmPattern ;

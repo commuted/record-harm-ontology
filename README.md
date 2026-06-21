@@ -35,13 +35,19 @@ The Record Harm Ontology provides a rigorous taxonomy of how informational recor
 ```
 record-harm-ontology/
 ├── ontology/
-│   └── record-harm-ontology.ttl    # Main OWL 2 DL ontology (v2.2)
+│   └── record-harm-ontology.ttl    # Main OWL 2 DL ontology (v2.3)
 ├── shapes/
 │   └── record-harm-shapes.ttl      # SHACL validation constraints
 ├── examples/
-│   └── (example data files)
+│   └── example-harm-events.ttl     # Worked HarmEvent / Record / Agent data
 ├── docs/
-│   └── (additional documentation)
+│   ├── ARCHITECTURE.md             # Design patterns and rationale
+│   └── QUERIES.md                  # Example SPARQL queries
+├── scripts/
+│   └── validate.py                 # Syntax + SHACL validation + metrics
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
 └── README.md
 ```
 
@@ -133,7 +139,7 @@ ex:exampleDestructionEvent a ex:HarmEvent ;
     ex:ofType ex:Destruction ;
     ex:harms ex:SomeSpecificRecord ;
     dc:date "2026-06-15"^^xsd:date ;
-    ex:perpetrator ex:SomeActor ;
+    ex:perpetrator ex:SomeAgent ;
     ex:severity 8 .
 ```
 
@@ -208,7 +214,7 @@ This ontology is part of the broader "thought framework" project exploring philo
 
 ## License
 
-[Specify license - e.g., CC BY 4.0, MIT, Apache 2.0]
+MIT License — Copyright (c) 2026 Ron Hinchley. See [LICENSE](LICENSE).
 
 ## Citation
 
@@ -217,18 +223,18 @@ If you use this ontology in academic work, please cite:
 ```bibtex
 @misc{recordharmontology2026,
   title={Record Harm Ontology: A Formal Model of Ontological Attacks on Information},
-  author={[Author names]},
+  author={Hinchley, Ron},
   year={2026},
-  version={2.2},
-  url={https://github.com/[username]/record-harm-ontology}
+  version={2.3},
+  url={https://github.com/commuted/record-harm-ontology}
 }
 ```
 
 ## Contact
 
 - **Project**: Part of the thought framework collection
-- **Repository**: [GitHub URL]
-- **Issues**: [GitHub Issues URL]
+- **Repository**: https://github.com/commuted/record-harm-ontology
+- **Issues**: https://github.com/commuted/record-harm-ontology/issues
 
 ## Related Work
 
