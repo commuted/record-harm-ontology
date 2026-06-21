@@ -299,6 +299,15 @@ ex:Omission a ex:RecordHarm , ex:PrimeHarm , skos:Concept ;
     ex:reversibility ex:PartiallyReversible ;
     skos:definition "Deliberate exclusion of relevant elements that should be part of the record. Creates a mutilated or incomplete entity. Prime partial annihilation." .
 
+ex:Denial a ex:RecordHarm , ex:PrimeHarm , skos:Concept ;
+    rdfs:label "Denial of record" ;
+    rdfs:isDefinedBy ex:RecordHarmOntology ;
+    skos:inScheme ex:RecordHarmScheme ;
+    ex:targetsAspect ex:Trustworthiness , ex:Existence ;
+    ex:detectability ex:EasilyDetectable ;
+    ex:reversibility ex:Reversible ;
+    skos:definition "Refusing to acknowledge the existence or validity of a genuine record, independent of whether the record remains accessible. Attacks its ontological status as something that is. [v2.1] Promoted to a fifth PrimeHarm: unlike Suppression, denial requires no act of hiding -- a fully accessible record can still be denied ('that document is fake'). That made it irreducible to the other four primes, so it now stands alongside them rather than building upon Suppression." .
+
 # ---- COMPOSITE / DERIVED HARMS ----
 
 ex:ForgeryOfProvenance a ex:RecordHarm , ex:CompositeHarm , skos:Concept ;
@@ -360,15 +369,6 @@ ex:Contamination a ex:RecordHarm , ex:CompositeHarm , skos:Concept ;
     ex:reversibility ex:PartiallyReversible ;
     ex:buildsUpon ex:Fabrication ;
     skos:definition "Introducing false elements into an otherwise genuine record, or mixing genuine records with fabricated ones, so that doubt infects the whole. Undermines trustworthiness of the entire ontological status." .
-
-ex:Denial a ex:RecordHarm , ex:PrimeHarm , skos:Concept ;
-    rdfs:label "Denial of record" ;
-    rdfs:isDefinedBy ex:RecordHarmOntology ;
-    skos:inScheme ex:RecordHarmScheme ;
-    ex:targetsAspect ex:Trustworthiness , ex:Existence ;
-    ex:detectability ex:EasilyDetectable ;
-    ex:reversibility ex:Reversible ;
-    skos:definition "Refusing to acknowledge the existence or validity of a genuine record, independent of whether the record remains accessible. Attacks its ontological status as something that is. [v2.1] Promoted to a fifth PrimeHarm: unlike Suppression, denial requires no act of hiding -- a fully accessible record can still be denied ('that document is fake'). That made it irreducible to the other four primes, so it now stands alongside them rather than building upon Suppression." .
 
 ex:Repudiation a ex:RecordHarm , ex:CompositeHarm , skos:Concept ;
     rdfs:label "Repudiation / Disavowal of authorship or authority" ;
