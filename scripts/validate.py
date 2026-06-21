@@ -202,12 +202,15 @@ def main():
     # Ontology self-check: the worked examples + harm types live in this graph.
     ok &= validate_shacl("ontology", ont_graph, shapes_graph, ont_graph)
 
-    # Examples: validate the standalone data file against the shapes, with the
-    # ontology supplied as ont_graph so sh:class (ofType→RecordHarm, harms→Record)
-    # resolves across the file boundary.
+    # Examples: validate them MERGED WITH the ontology, not standalone. The
+    # example data references ontology individuals (ofType -> harm types, etc.),
+    # and the shapes target ex:RecordHarm; validating the examples alone would
+    # target those harm types without their full definitions and report false
+    # violations. A real consumer loads both graphs together, so we do too.
     if examples_path.exists():
         ex_graph = validate_syntax(examples_path)
-        ok &= validate_shacl("examples", ex_graph, shapes_graph, ont_graph)
+        ok &= validate_shacl("ontology + examples", ont_graph + ex_graph,
+                             shapes_graph, ont_graph)
     else:
         print(f"\n⚠️  Examples file not found, skipping: {examples_path}")
 
