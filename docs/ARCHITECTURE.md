@@ -66,16 +66,20 @@ ex:PrimeHarm owl:disjointWith ex:CompositeHarm .
 
 **Rationale**: Reasoner can detect classification errors; a harm cannot be both prime and composite
 
-### 3. Transitive Dependency Chain
+### 3. Dependency Chain (closure computed, not asserted)
 
-**Pattern**: Composite harms transitively depend on all primes beneath them
+**Pattern**: Composite harms transitively depend on all primes beneath them — but the transitive *closure* is computed on demand, not materialized by the reasoner.
 
 **Implementation**:
-```turtle
-ex:buildsUpon a owl:TransitiveProperty .
+```sparql
+# ex:buildsUpon is intentionally NOT owl:TransitiveProperty (see note below).
+# Walk the chain with a property path instead:
+SELECT ?prime WHERE { ex:Obfuscation ex:buildsUpon+ ?prime }
 ```
 
-**Rationale**: If Obfuscation builds on Suppression, and Suppression builds on Omission, then Obfuscation transitively builds on Omission
+**Rationale**: If Obfuscation builds on Suppression and Suppression builds on Omission, then Obfuscation transitively builds on Omission. `ex:buildsUpon+` derives this at query time.
+
+**Why not `owl:TransitiveProperty`?** A transitive property is "non-simple" in OWL 2 DL, and OWL 2 DL forbids non-simple properties from being declared asymmetric or irreflexive, or from being used in cardinality restrictions. `ex:buildsUpon` is all three (asymmetric, irreflexive, and the basis of `ex:CompositeHarm`'s cardinality definition), so declaring it transitive would push the ontology into OWL 2 Full and a conforming DL reasoner would refuse the CompositeHarm definition. Keeping it simple preserves both the cycle guards and reasoner-derivable classification. *(Fixed in v2.3; v2.0–v2.2 had this defect.)*
 
 ### 4. Controlled Vocabularies (SKOS)
 
@@ -106,7 +110,7 @@ ex:buildsUpon a owl:TransitiveProperty .
 |----------|--------|-------|-----------------|
 | `harms` | RecordHarm ∪ HarmEvent | Record | - |
 | `ofType` | HarmEvent | RecordHarm | Functional (cardinality 1) |
-| `buildsUpon` | RecordHarm | RecordHarm | Transitive, Asymmetric, Irreflexive |
+| `buildsUpon` | RecordHarm | RecordHarm | Asymmetric, Irreflexive (not transitive — see Pattern 3) |
 | `isBuiltUponBy` | RecordHarm | RecordHarm | Inverse of buildsUpon |
 | `targetsAspect` | RecordHarm | skos:Concept | Multi-valued |
 | `includesHarm` | HarmPattern | RecordHarm | Multi-valued (min 2) |
@@ -124,18 +128,16 @@ ex:buildsUpon a owl:TransitiveProperty .
 
 ### OWL Reasoning
 
-With a DL reasoner (HermiT, Pellet):
+With a DL reasoner (HermiT, Pellet, ELK):
 
 1. **Classification**: Infer CompositeHarm membership from buildsUpon presence
-2. **Transitivity**: Compute full dependency chains
-3. **Disjointness**: Detect Prime/Composite conflicts
-4. **Property chains**: Infer indirect relationships
+2. **Disjointness**: Detect Prime/Composite conflicts
+3. **Asymmetry/irreflexivity**: Detect a harm that builds upon itself or directly back upon a dependant
 
-Example inference:
+These hold only because the ontology stays within OWL 2 DL (see Pattern 3). Transitive dependency chains are **not** a reasoner capability here — `ex:buildsUpon` is not transitive — they are computed with the SPARQL property path:
 ```sparql
-# Asserted: Obfuscation buildsUpon Suppression
-# Asserted: Suppression buildsUpon Omission
-# Inferred: Obfuscation buildsUpon Omission (transitivity)
+# Asserted: Obfuscation buildsUpon Suppression; Suppression buildsUpon Omission
+# Query:    ex:Obfuscation ex:buildsUpon+ ?x  ->  Suppression, Omission
 ```
 
 ### SHACL Validation

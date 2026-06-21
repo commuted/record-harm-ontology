@@ -80,12 +80,27 @@
 #    it operationalizes the buildsUpon-cardinality check as a hard,
 #    closed-world validation rule instead of something only visible
 #    to a DL reasoner.
+#
+# [v2.3] OWL 2 DL profile fix:
+#  - ex:buildsUpon is NO LONGER owl:TransitiveProperty. v2.0-v2.2 declared
+#    it transitive AND asymmetric AND irreflexive AND used it in a
+#    cardinality restriction (ex:CompositeHarm's equivalentClass). OWL 2 DL
+#    treats a transitive property as "non-simple" and forbids non-simple
+#    properties from being asymmetric, irreflexive, or used in cardinality
+#    restrictions -- so all three of those uses were illegal and the
+#    ontology was silently OWL 2 Full, where a conforming DL reasoner
+#    refuses the very cardinality-based CompositeHarm definition this design
+#    relies on. Dropping transitivity restores OWL 2 DL and keeps the
+#    asymmetric/irreflexive cycle guards and the reasoner-derivable
+#    CompositeHarm membership working. Transitive closure is unaffected for
+#    querying: use the SPARQL property path ex:buildsUpon+ (see QUERIES.md);
+#    it is simply computed on demand rather than materialized by the reasoner.
 
 ex:RecordHarmOntology a owl:Ontology ;
     dc:title "Record Harm Ontology" ;
     dc:description "Ontology for modeling ontological harms to records. Captures prime (fundamental) and composite ways to damage the existence, authenticity, integrity, accessibility, context, or trustworthiness of a Record." ;
     dc:creator "Grok conceptual modeling; revised by Claude, 2026-06-20" ;
-    owl:versionInfo "2.2" ;
+    owl:versionInfo "2.3" ;
     dc:created "2026-06-20"^^xsd:date .
 
 # ----------------------------------------
@@ -197,11 +212,11 @@ ex:targetsAspect a owl:ObjectProperty ;
     rdfs:label "targets aspect" ;
     rdfs:comment "The aspect(s) of the record's ontology attacked by this harm. Multi-valued. [v2] This is now the SOLE place aspect-targeting is recorded -- v1 duplicated this via aspect-named subclasses (ExistenceHarm, AuthenticityHarm...) which had drifted out of sync with this property (e.g. MutationHarm had no matching aspect). Range narrowed to skos:Concept since aspects are now modeled as a SKOS vocabulary." .
 
-ex:buildsUpon a owl:ObjectProperty , owl:TransitiveProperty , owl:AsymmetricProperty , owl:IrreflexiveProperty ;
+ex:buildsUpon a owl:ObjectProperty , owl:AsymmetricProperty , owl:IrreflexiveProperty ;
     rdfs:domain ex:RecordHarm ;
     rdfs:range ex:RecordHarm ;
     rdfs:label "builds upon" ;
-    rdfs:comment "Indicates that this harm depends on, extends, or presupposes another harm. [v2] Declared transitive (if a composite builds upon a composite, it transitively builds upon every prime beneath it), asymmetric and irreflexive (a harm cannot build upon itself or upon something that builds upon it -- prevents dependency cycles)." .
+    rdfs:comment "Indicates that this harm depends on, extends, or presupposes another harm. Asymmetric and irreflexive: a harm cannot build upon itself or directly back upon something that builds upon it. [v2.3] NO LONGER declared owl:TransitiveProperty. A transitive property is 'non-simple' in OWL 2 DL, and OWL 2 DL forbids non-simple properties from being declared asymmetric/irreflexive OR used in cardinality restrictions -- but buildsUpon is all of those (see ex:CompositeHarm's equivalentClass minCardinality). Keeping it transitive silently put the whole ontology in OWL 2 Full, where a conforming DL reasoner (HermiT/Pellet/ELK) refuses the cardinality-based CompositeHarm definition this design depends on. Transitive *closure* is still available where needed via the SPARQL property path buildsUpon+ (see docs/QUERIES.md); it is simply not materialized by the reasoner. This keeps the ontology in OWL 2 DL so the reasoner cross-checks (disjointness, cardinality-derived CompositeHarm membership) actually run." .
 
 # [v2] ex:hasDescription and ex:composesWith removed.
 #   hasDescription -> replaced by skos:definition (standard vocabulary,

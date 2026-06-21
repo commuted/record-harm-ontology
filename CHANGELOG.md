@@ -5,6 +5,23 @@ All notable changes to the Record Harm Ontology will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-06-20
+
+### Fixed
+- **OWL 2 DL profile compliance**: removed `owl:TransitiveProperty` from `ex:buildsUpon`.
+  Since v2.0 the property was simultaneously transitive, asymmetric, irreflexive, and
+  used in `ex:CompositeHarm`'s cardinality-based `owl:equivalentClass`. OWL 2 DL classifies
+  a transitive property as "non-simple" and forbids non-simple properties from being
+  asymmetric/irreflexive or used in cardinality restrictions, so v2.0–v2.2 were actually
+  OWL 2 Full — a conforming DL reasoner (HermiT/Pellet/ELK) would refuse the CompositeHarm
+  definition the design relies on. Dropping transitivity restores OWL 2 DL while preserving
+  the cycle guards (asymmetric + irreflexive) and reasoner-derivable CompositeHarm membership.
+
+### Changed
+- Transitive dependency chains are now obtained via the SPARQL property path `ex:buildsUpon+`
+  (already used in `docs/QUERIES.md`) rather than reasoner materialization. No query results change.
+- Updated README and `docs/ARCHITECTURE.md` to document the simple-property rationale.
+
 ## [2.2.0] - 2026-06-20
 
 ### Added

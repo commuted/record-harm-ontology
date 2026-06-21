@@ -2,9 +2,11 @@
 
 A formal OWL 2 DL ontology for modeling ontological attacks on informational records.
 
-[![Version](https://img.shields.io/badge/version-2.2-blue.svg)](ontology/record-harm-ontology.ttl)
+[![Version](https://img.shields.io/badge/version-2.3-blue.svg)](ontology/record-harm-ontology.ttl)
 [![OWL 2 DL](https://img.shields.io/badge/OWL-2%20DL-green.svg)](https://www.w3.org/TR/owl2-overview/)
 [![SHACL](https://img.shields.io/badge/SHACL-validated-green.svg)](shapes/record-harm-shapes.ttl)
+
+> **OWL 2 DL note:** `ex:buildsUpon` is asymmetric and irreflexive and is used in `ex:CompositeHarm`'s cardinality-based definition, so it is deliberately **not** declared transitive — a transitive property is "non-simple" in OWL 2 DL and may not be asymmetric/irreflexive or appear in cardinality restrictions. Transitive dependency chains are computed on demand with the SPARQL property path `ex:buildsUpon+` (see [docs/QUERIES.md](docs/QUERIES.md)), not materialized by the reasoner. This keeps the ontology inside OWL 2 DL so a conforming reasoner can run the disjointness and CompositeHarm-membership cross-checks.
 
 ## Overview
 
@@ -169,7 +171,10 @@ The ontology includes comprehensive SHACL shapes that enforce:
 
 ## Version History
 
-### v2.2 (Current)
+### v2.3 (Current)
+- **OWL 2 DL profile fix**: removed `owl:TransitiveProperty` from `ex:buildsUpon`. Transitivity is incompatible with the property also being asymmetric, irreflexive, and used in a cardinality restriction (all forbidden for "non-simple" properties in OWL 2 DL); v2.0–v2.2 were therefore OWL 2 Full despite the DL claim. Transitive closure remains available via the `ex:buildsUpon+` SPARQL path.
+
+### v2.2
 - Added HarmEvent class for modeling specific occurrences
 - Added HarmPattern class for empirical co-occurrences
 - Introduced controlled vocabularies for detectability/reversibility
