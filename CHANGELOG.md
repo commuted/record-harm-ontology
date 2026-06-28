@@ -5,6 +5,15 @@ All notable changes to the Record Harm Ontology will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Relicensed** from MIT to **CC BY 4.0** for the ontology and documentation,
+  with the scripts additionally under the **MIT License**. Aligns with the
+  epistemic-ontology.net family (CC BY 4.0 is the standard content license for an
+  ontology). Attribution: "Record Harm Ontology — epistemic-ontology.net".
+  `dc:license` now declared in the ontology header.
+
 ## [2.3.0] - 2026-06-20
 
 ### Added

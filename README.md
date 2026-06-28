@@ -214,7 +214,13 @@ This ontology is part of the broader "thought framework" project exploring philo
 
 ## License
 
-MIT License — Copyright (c) 2026 Ron Hinchley. See [LICENSE](LICENSE).
+The ontology and documentation are licensed **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** —
+permissive, reuse and adapt freely (including commercially), with attribution:
+
+> "Record Harm Ontology — epistemic-ontology.net" — https://www.epistemic-ontology.net/record-harm
+
+The scripts (`scripts/`) are additionally available under the **MIT License**.
+See [LICENSE](LICENSE). Copyright © 2026 Ron Hinchley / epistemic-ontology.net.
 
 ## Citation
 

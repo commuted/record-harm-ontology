@@ -200,7 +200,7 @@ When contributing, follow these principles:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (MIT License).
+By contributing, you agree that your contributions will be licensed under the same terms as the project: **CC BY 4.0** for the ontology and documentation, and the **MIT License** for the scripts. See [LICENSE](LICENSE).
 
 ## Recognition
 

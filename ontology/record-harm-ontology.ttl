@@ -111,6 +111,7 @@ ex:RecordHarmOntology a owl:Ontology ;
     dc:title "Record Harm Ontology" ;
     dc:description "Ontology for modeling ontological harms to records. Captures prime (fundamental) and composite ways to damage the existence, authenticity, integrity, accessibility, context, or trustworthiness of a Record." ;
     dc:creator "Grok conceptual modeling; revised by Claude, 2026-06-20" ;
+    dc:license <http://creativecommons.org/licenses/by/4.0/> ;
     owl:versionInfo "2.3" ;
     dc:created "2026-06-20"^^xsd:date .
 
