@@ -60,6 +60,13 @@ SELECT ?harm ?label ?definition WHERE {
 
 ### Find All Transitive Dependencies
 
+> **v3.0**: the dependency graph is currently **flat** — every composite builds
+> directly on primes, maximum chain depth 1 — so `ex:buildsUpon+` returns the
+> same rows as `ex:buildsUpon` here. The two-hop chain that used to exist
+> (`Obfuscation → Suppression → Omission`) was the defect fixed in v3.0. The
+> `+` form is kept because it remains correct if a composite is ever given a
+> composite dependency.
+
 ```sparql
 PREFIX ex: <http://example.org/record-harm-ontology#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -105,6 +112,99 @@ SELECT ?harm ?label (COUNT(DISTINCT ?prime) as ?primeCount) WHERE {
 GROUP BY ?harm ?label
 ORDER BY DESC(?primeCount)
 ```
+
+## Record Location (bearer and nesting)
+
+*New in v3.1.* Where a record lives is stated with `ex:bearer`, and what it is
+made of with `ex:hasElement`. Neither needed a new harm type — the
+inside-agent / inside-community distinction is a property of the record, not a
+dimension of harm.
+
+### Inside-agent vs inside-community records
+
+A record borne by exactly one agent resides inside that agent; one borne by
+several, or by a collective agent, resides in a community.
+
+```sparql
+PREFIX ex: <http://example.org/record-harm-ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?record ?label (COUNT(DISTINCT ?bearer) as ?bearers) WHERE {
+    ?record a ex:Record ;
+            rdfs:label ?label ;
+            ex:bearer ?bearer .
+}
+GROUP BY ?record ?label
+ORDER BY ?bearers
+```
+
+> Bearer *count* alone cannot tell a single individual bearer from a single
+> collective one — a parish register borne by the parish returns `1`, same as a
+> private memory. That is deliberate: per the note on `ex:Agent`, the
+> individual/collective distinction is left to an external vocabulary, so add
+> `?bearer a foaf:Group` (or `prov:Organization`) to split them.
+
+### Self-directed harm (repression, self-deception)
+
+The perpetrator of the event is also the bearer of the record it harms.
+Inexpressible before `ex:bearer` existed.
+
+```sparql
+PREFIX ex: <http://example.org/record-harm-ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?event ?eventLabel ?harmType ?agent WHERE {
+    ?event a ex:HarmEvent ;
+           ex:perpetrator ?agent ;
+           ex:harms ?record ;
+           ex:ofType ?harmType .
+    ?record ex:bearer ?agent .
+    OPTIONAL { ?event rdfs:label ?eventLabel }
+}
+```
+
+### Records nested inside a community register
+
+```sparql
+PREFIX ex: <http://example.org/record-harm-ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?whole ?wholeLabel ?element ?elementLabel WHERE {
+    ?whole ex:hasElement+ ?element .
+    OPTIONAL { ?whole rdfs:label ?wholeLabel }
+    OPTIONAL { ?element rdfs:label ?elementLabel }
+}
+```
+
+> `ex:hasElement` is asymmetric and irreflexive but **not** transitive (the
+> v2.3 precedent — transitivity would make it non-simple in OWL 2 DL and
+> forbid those two guards), so nesting is walked with `+` exactly as
+> `ex:buildsUpon` is. A nesting *cycle* deeper than two steps violates no
+> declared OWL axiom and is caught instead by `ex:RecordAcyclicShape` in the
+> shapes file.
+
+### Agent-to-community boundary: what a register leaves out
+
+Records held by some agent that are not elements of a given register. Candidate
+`ex:Omission` from that register — the modeled form of refusing a record entry.
+
+```sparql
+PREFIX ex: <http://example.org/record-harm-ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?record ?label ?bearer WHERE {
+    ?record a ex:Record ;
+            ex:bearer ?bearer .
+    OPTIONAL { ?record rdfs:label ?label }
+    FILTER NOT EXISTS { ex:ParishRegister ex:hasElement+ ?record }
+    FILTER (?record != ex:ParishRegister)
+}
+```
+
+> This finds *candidates*, not harms. Most records a community does not hold
+> were never owed to it; omission is a harm only where the record should have
+> been part of the register, and nothing in this ontology supplies the "should"
+> (see the scope boundary note at `ex:RecordHarm`).
 
 ## Event Queries
 
@@ -224,6 +324,44 @@ SELECT ?aspect ?aspectLabel (COUNT(DISTINCT ?harm) as ?harmCount) WHERE {
 GROUP BY ?aspect ?aspectLabel
 ORDER BY DESC(?harmCount)
 ```
+
+### Aspect Coverage by Prime
+
+The diagnostic that found the v3.0 defect. Every aspect should appear with at
+least one prime; an aspect whose `primes` column is empty means some composite
+is rooted in a prime that does not actually attack that aspect — before v3.0
+`ex:Accessibility` came back empty, because `ex:Suppression` was a composite
+hanging off `ex:Omission` on an edge that contradicted both definitions.
+
+`scripts/validate.py` runs this as a hard check (`check_aspect_coverage`); it
+is reproduced here because the grouped form is the one worth eyeballing when
+adding a harm or an aspect.
+
+```sparql
+PREFIX ex: <http://example.org/record-harm-ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?aspectLabel
+       (GROUP_CONCAT(DISTINCT ?primeLabel; separator=", ") AS ?primes)
+WHERE {
+    ?aspect skos:inScheme ex:RecordAspectScheme ;
+            skos:prefLabel ?aspectLabel .
+    OPTIONAL {
+        ?prime a ex:PrimeHarm ;
+               ex:targetsAspect ?aspect ;
+               rdfs:label ?primeLabel .
+    }
+}
+GROUP BY ?aspectLabel
+ORDER BY ?aspectLabel
+```
+
+> `OPTIONAL` is load-bearing here: the point of the query is the aspects with
+> *no* prime, and an inner join would silently drop exactly those rows. Note
+> also that rdflib raises `NotBoundError` on `GROUP_CONCAT(DISTINCT ...)` over a
+> variable left unbound by `OPTIONAL`, so with rdflib use
+> `COALESCE(?primeLabel, "NONE")` inside the concat, or do the grouping in
+> Python as `check_aspect_coverage` does.
 
 ### Multi-Aspect Harms
 

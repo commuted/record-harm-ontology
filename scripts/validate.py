@@ -6,8 +6,10 @@ Validates:
 1. OWL/Turtle syntax (ontology + examples)
 2. OWL 2 DL profile: simple-property rules (regression guard for the
    transitivity-vs-cardinality defect fixed in v2.3)
-3. SHACL constraint compliance (ontology self-check + examples)
-4. Basic ontology metrics
+3. Aspect coverage: every RecordAspect is reachable from a PrimeHarm
+   (regression guard for the Accessibility gap fixed in v3.0)
+4. SHACL constraint compliance (ontology self-check + examples)
+5. Basic ontology metrics
 """
 
 import sys
@@ -121,30 +123,96 @@ def check_owl_profile(g):
 
 
 # ---------------------------------------------------------------------------
+# Aspect coverage
+# ---------------------------------------------------------------------------
+
+def check_aspect_coverage(g):
+    """Every concept in ex:RecordAspectScheme must be targeted by at least one
+    ex:PrimeHarm.
+
+    An aspect that only composite harms attack is a structural smell, not a
+    neutral fact: every composite bottoms out in primes via ex:buildsUpon, so
+    if some aspect is reachable only through composites, one of those
+    composites is hanging off a prime that does not actually attack that
+    aspect. That is exactly the v3.0 defect -- ex:Accessibility had no prime,
+    and ex:Suppression had been given a `buildsUpon ex:Omission` edge that
+    contradicted both definitions purely for want of anywhere else to attach.
+    Cheap check, and it is what surfaced the bug, so it stays in CI.
+
+    This is a heuristic about ontology shape, not an OWL or SHACL constraint --
+    neither language can express it (SHACL could only check it per-aspect with
+    a hand-written shape per concept, which would have to be updated by the
+    same person who forgot the prime).
+    """
+    print("\n🔍 Checking aspect coverage (every aspect reachable from a prime)...")
+    EX = "http://example.org/record-harm-ontology#"
+    q = f"""PREFIX ex: <{EX}>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT ?aspect WHERE {{
+          ?aspect skos:inScheme ex:RecordAspectScheme .
+          FILTER NOT EXISTS {{ ?h a ex:PrimeHarm ; ex:targetsAspect ?aspect }}
+        }}"""
+    uncovered = [_short(r[0]) for r in g.query(q)]
+    if uncovered:
+        print("❌ Aspects targeted by no PrimeHarm:")
+        for a in sorted(uncovered):
+            print(f"   - {a}  (a composite is probably rooted in the wrong prime)")
+        return False
+    print("✅ Every RecordAspect is targeted by at least one PrimeHarm")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # SHACL
 # ---------------------------------------------------------------------------
 
 def validate_shacl(label, data_graph, shacl_graph, ont_graph):
-    """Validate a data graph against SHACL shapes (ontology supplied for
-    inference so sh:class checks resolve harm-type/Record/Agent typing)."""
-    print(f"\n🔍 Validating SHACL constraints: {label} ...")
+    """Validate a data graph against SHACL shapes, in TWO passes.
+
+    [v3.1] Both passes are necessary, and running only the first (as every
+    version through v3.0 did) left some shapes nominally green while testing
+    nothing:
+
+    - inference="rdfs": RDFS entailment on, so sh:class checks resolve typing
+      that follows from subclass axioms. This is how a real consumer loads the
+      graph.
+    - inference="none": no entailment. Needed because the ontology declares
+      rdfs:domain/rdfs:range on its properties, and under RDFS those axioms
+      MANUFACTURE the very typing that the type-asserting shapes exist to
+      check. ex:BuildsUponEndpointTypeShape says it "catches a node that uses
+      buildsUpon but was never given any RecordHarm typing" -- but with RDFS
+      on, ex:buildsUpon's domain/range silently types that node as a
+      RecordHarm, so the shape cannot fail. Verified: an untyped node using
+      ex:buildsUpon passes the rdfs pass and is reported, misleadingly, by the
+      aspect and classification shapes instead; it fails the correct shape with
+      the correct message only when inference is off. Same applies to
+      ex:RecordShape's sh:class on ex:hasElement.
+
+    A violation in either pass fails the run.
+    """
     if not HAVE_PYSHACL:
-        print("⚠️  pyshacl not installed -- skipping SHACL (pip install pyshacl)")
+        print(f"\n⚠️  pyshacl not installed -- skipping SHACL for {label} "
+              f"(pip install pyshacl)")
         return True
-    conforms, _results_graph, results_text = _shacl_validate(
-        data_graph,
-        shacl_graph=shacl_graph,
-        ont_graph=ont_graph,
-        inference="rdfs",
-        abort_on_first=False,
-        allow_warnings=True,
-    )
-    if conforms:
-        print(f"✅ {label}: all SHACL constraints satisfied")
-        return True
-    print(f"❌ {label}: SHACL validation failed:")
-    print(results_text)
-    return False
+
+    ok = True
+    for inference in ("rdfs", "none"):
+        print(f"\n🔍 Validating SHACL constraints: {label} (inference={inference}) ...")
+        conforms, _results_graph, results_text = _shacl_validate(
+            data_graph,
+            shacl_graph=shacl_graph,
+            ont_graph=ont_graph,
+            inference=inference,
+            abort_on_first=False,
+            allow_warnings=True,
+        )
+        if conforms:
+            print(f"✅ {label} (inference={inference}): all SHACL constraints satisfied")
+        else:
+            print(f"❌ {label} (inference={inference}): SHACL validation failed:")
+            print(results_text)
+            ok = False
+    return ok
 
 
 # ---------------------------------------------------------------------------
@@ -199,6 +267,7 @@ def main():
 
     ok = True
     ok &= check_owl_profile(ont_graph)
+    ok &= check_aspect_coverage(ont_graph)
     # Ontology self-check: the worked examples + harm types live in this graph.
     ok &= validate_shacl("ontology", ont_graph, shapes_graph, ont_graph)
 
