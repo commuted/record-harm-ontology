@@ -22,7 +22,7 @@ The Record Harm Ontology focuses on **ontological attacks on records** — how r
 | **Destruction** | Denial of Service (partial) | DoS is transient unavailability; Destruction is permanent loss |
 | **Suppression** | Denial of Service (partial) | Suppression is deliberate concealment; DoS is service disruption |
 | **Denial** | Repudiation | Both involve denying validity/authorship |
-| **Omission** | Information Disclosure (inverse) | Omission excludes; Disclosure leaks. Not direct opposites. |
+| **Omission** | *(no direct mapping)* | STRIDE has no completeness category. Not an inverse of Information Disclosure: omission attacks what the record contains, disclosure attacks who can read it — different aspects, not opposite ends of one. |
 | **ForgeryOfProvenance** | Spoofing | Both involve falsifying identity/origin |
 | **Repudiation** | Repudiation | Direct mapping |
 | **Contamination** | Tampering | Mixing genuine with false |
@@ -49,8 +49,8 @@ The Record Harm Ontology focuses on **ontological attacks on records** — how r
 | **Contamination** | Integrity | Mixing genuine with false |
 | **Omission** | Integrity | Incomplete records |
 | **ForgeryOfProvenance** | Integrity + Authenticity | Falsifying origin/custody |
-| **Denial** | Trustworthiness | Contesting legitimacy |
-| **Repudiation** | Trustworthiness | Disavowing authorship |
+| **Denial** | *(no mapping)* | Contesting legitimacy. Trustworthiness is a Record Harm aspect, not a CIA category — see the key difference below. |
+| **Repudiation** | *(no mapping)* | Disavowing authorship. Same gap as Denial. |
 | **Decontextualization** | Integrity | Stripping metadata/context |
 | **Fragmentation** | Integrity + Availability | Breaking into disconnected pieces |
 | **Obfuscation** | Availability | Degrading comprehensibility |
@@ -58,7 +58,7 @@ The Record Harm Ontology focuses on **ontological attacks on records** — how r
 
 **Key Differences:**
 - **CIA is property-centric** (what properties are violated); Record Harm is **action-centric** (what attacks occur)
-- **CIA Integrity is broad**; Record Harm **distinguishes 6 prime harms** within integrity violations
+- **CIA Integrity is broad**; Record Harm **separates what it lumps together** — `Alteration` and `Omission` both violate integrity but are distinct primes, and `Fabrication` is split off entirely as an attack on Authenticity
 - **CIA Availability conflates** destruction, suppression, and obfuscation; Record Harm **separates them**
 - **Record Harm adds Trustworthiness** as a distinct aspect beyond CIA
 
@@ -223,6 +223,14 @@ Spoliation doctrine addresses destruction or concealment of evidence in legal pr
 - **Spoliation Doctrine**: Legal doctrine on evidence destruction/concealment
 - **Record Harm Ontology**: This ontology (v3.1)
 
-## Version History
+## Versioning
 
-- **v1.0** (2026-10-06): Initial comparison table
+This document describes the Record Harm Ontology at **v3.1** and carries no
+version of its own. The ontology has a single version, asserted in
+`owl:versionInfo` and recorded in [CHANGELOG.md](../CHANGELOG.md); a separate
+per-document number would be a second version axis that drifts out of step
+with the thing it describes — the same failure mode as v1's
+`isFundamentalRoot` boolean drifting out of step with class membership.
+
+When the mappings below change because the taxonomy changed, record it in the
+ontology's changelog entry for that release, not here.

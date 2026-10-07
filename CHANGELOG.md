@@ -53,6 +53,16 @@ harm type; it needed `ex:Record` to stop being a terminal node.
 - Four queries in `docs/QUERIES.md`: bearer counts, self-directed harm, nesting
   via `ex:hasElement+`, and the agent→community boundary (what a register
   leaves out).
+- **`docs/ONTOLOGY-COMPARISON.md`** — maps the taxonomy to STRIDE, the CIA
+  triad, InterPARES diplomatics and spoliation doctrine, with the deliberate
+  gaps (confidentiality, pure non-creation) marked as gaps rather than
+  omissions, plus integration guidance per audience. Carries no version of its
+  own: it describes the ontology at 3.1 and tracks this changelog, since a
+  per-document version is a second axis that drifts out of step with the thing
+  it describes.
+- Accessibility language throughout `README.md` and `docs/ARCHITECTURE.md`:
+  worked prose walkthroughs of the inside-agent / inside-community distinction
+  and of self-directed harm, for readers who do not read Turtle.
 
 ### Fixed
 - **SHACL validation now runs in two passes, with RDFS inference on and off.**
