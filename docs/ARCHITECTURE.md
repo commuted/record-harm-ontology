@@ -161,6 +161,89 @@ That last row is the agent→community boundary, and it works because a register
 is itself an `ex:Record` whose elements are records (`ex:hasElement`), so
 non-admission is exclusion of an element. The six primes are untouched.
 
+**Agent-Centric Examples (Psychological)**:
+
+*Repression* — A witness actively suppresses a traumatic memory. The memory remains intact but inaccessible:
+```turtle
+ex:TraumaMemory a ex:Record ;
+    rdfs:label "Memory of the assault" ;
+    ex:bearer ex:Witness .
+
+ex:RepressionEvent a ex:HarmEvent ;
+    ex:ofType ex:Suppression ;
+    ex:harms ex:TraumaMemory ;
+    ex:perpetrator ex:Witness ;  # perpetrator = bearer: self-directed harm
+    ex:severity 7 .
+```
+
+*Confabulation* — An executive fabricates a false memory to fill a gap in their recollection:
+```turtle
+ex:FalseMemory a ex:Record ;
+    rdfs:label "Confabulated memory of board approval" ;
+    ex:bearer ex:Executive .
+
+ex:ConfabulationEvent a ex:HarmEvent ;
+    ex:ofType ex:Fabrication ;
+    ex:harms ex:FalseMemory ;
+    ex:perpetrator ex:Executive ;  # self-directed
+    ex:severity 5 .
+```
+
+*Self-Deception* — An agent denies their own memory to avoid cognitive dissonance:
+```turtle
+ex:InconvenientMemory a ex:Record ;
+    rdfs:label "Memory contradicting self-image" ;
+    ex:bearer ex:Agent .
+
+ex:SelfDeceptionEvent a ex:HarmEvent ;
+    ex:ofType ex:Denial ;
+    ex:harms ex:InconvenientMemory ;
+    ex:perpetrator ex:Agent ;  # self-directed
+    ex:severity 4 .
+```
+
+**Communal Examples**:
+
+*Parish Register* — A community register as a record composed of individual testimonies:
+```turtle
+ex:ParishRegister a ex:Record ;
+    rdfs:label "Parish baptism register" ;
+    ex:bearer ex:ParishCommunity ;  # collective bearer
+    ex:hasElement ex:JohnTestimony, ex:MaryTestimony .
+
+ex:JohnTestimony a ex:Record ;
+    rdfs:label "John's testimony of baptism" ;
+    ex:bearer ex:John .  # individual bearer
+```
+
+*Refused Testimony* — A community refuses to admit an agent's testimony into the register:
+```turtle
+ex:RefusedTestimony a ex:Record ;
+    rdfs:label "Sarah's testimony (refused)" ;
+    ex:bearer ex:Sarah .
+
+ex:RefusalEvent a ex:HarmEvent ;
+    ex:ofType ex:Omission ;
+    ex:harms ex:ParishRegister ;  # harm is TO THE REGISTER (incomplete)
+    ex:perpetrator ex:ParishClerk ;
+    ex:severity 7 ;
+    rdfs:comment "Sarah's testimony kept out; register is now incomplete" .
+```
+Note: The harm is to the **register** (which lacks an element it should have), not to Sarah's testimony (which remains intact but excluded). This is the agent→community boundary.
+
+*Collective Memory Suppression* — A community collectively suppresses knowledge of an event:
+```turtle
+ex:CommunityMemory a ex:Record ;
+    rdfs:label "Collective memory of the incident" ;
+    ex:bearer ex:Elder1, ex:Elder2, ex:Elder3 .  # multiple individual bearers
+
+ex:CollectiveSuppressionEvent a ex:HarmEvent ;
+    ex:ofType ex:Suppression ;
+    ex:harms ex:CommunityMemory ;
+    ex:perpetrator ex:CommunityLeadership ;
+    ex:severity 8 .
+```
+
 **Why mereology was owed regardless**: `ex:Record` was a terminal node through
 v3.0 — object of `ex:harms`, subject of nothing. Three harm definitions already
 quantified over record structure in prose (`Omission` over "elements",

@@ -12,6 +12,37 @@ A formal OWL 2 DL ontology for modeling ontological attacks on informational rec
 
 The Record Harm Ontology provides a rigorous taxonomy of how informational records can be damaged, destroyed, or corrupted. It distinguishes between **prime harms** (ontologically irreducible attacks) and **composite harms** (derived from combinations of primes), while also modeling specific harm events and recurring harm patterns.
 
+**This ontology serves multiple communities:**
+
+### For Information Security Practitioners
+If you work with **STRIDE, CIA Triad, or threat modeling**, this ontology provides:
+- **Finer-grained integrity analysis** than CIA's broad "Integrity" category (6 distinct prime harms)
+- **Evidence chain tracking** for forensics and incident response
+- **Formal dependency modeling** showing how complex attacks build from primitives
+- **Direct mappings** to STRIDE categories (see [ONTOLOGY-COMPARISON.md](docs/ONTOLOGY-COMPARISON.md))
+
+**Your familiar concepts**: Tampering → Fabrication/Alteration, DoS → Destruction/Suppression, Repudiation → Denial/Repudiation
+
+### For Social Scientists and Conflict Researchers
+If you study **disinformation, propaganda, historical revisionism, or social conflict**, this ontology provides:
+- **Systematic classification** of information manipulation tactics
+- **Pattern recognition** for coordinated campaigns (cover-ups, miscontextualization)
+- **Community-level record modeling** (collective memory, institutional archives)
+- **Tracking harm to shared narratives** and communal knowledge
+
+**Your domain**: Genocide denial (Denial), historical erasure (Destruction), propaganda (Fabrication/Contamination), archival suppression (Suppression), selective history (Omission)
+
+### For AI Researchers and Psychologists
+If you work with **AI agents, cognitive modeling, or memory systems**, this ontology provides:
+- **Agent-centric record modeling** (memories, beliefs, internal states)
+- **Self-directed harm representation** (repression, self-deception, confabulation)
+- **Inside-agent vs. inside-community distinction** (individual vs. collective knowledge)
+- **Novel applications** to AI alignment, belief revision, and epistemic integrity
+
+**Your domain**: Memory distortion (Alteration), motivated forgetting (Destruction), confabulation (Fabrication), repression (Suppression), belief denial (Denial)
+
+---
+
 ### Key Features
 
 - **6 Prime Harms**: Destruction, Fabrication, Alteration, Omission, Denial, Suppression
@@ -20,6 +51,45 @@ The Record Harm Ontology provides a rigorous taxonomy of how informational recor
 - **Pattern Layer**: Capture empirical co-occurrences of independent harms
 - **SHACL Validation**: Comprehensive constraint checking separate from OWL reasoning
 - **SKOS Vocabularies**: Controlled terms for aspects, detectability, and reversibility
+- **Record Location Modeling**: Inside-agent (memories, beliefs) and inside-community (registers, archives)
+
+## Quick Start by Domain
+
+### InfoSec: Map Your Threat Model
+```sparql
+# Find all harms that map to STRIDE Tampering
+PREFIX ex: <http://example.org/record-harm-ontology#>
+SELECT ?harm ?label WHERE {
+    VALUES ?harm { ex:Fabrication ex:Alteration ex:Contamination }
+    ?harm rdfs:label ?label .
+}
+```
+**Next**: See [ONTOLOGY-COMPARISON.md](docs/ONTOLOGY-COMPARISON.md) for complete STRIDE/CIA mappings
+
+### Social Science: Track Disinformation Campaigns
+```turtle
+ex:GenocideDenialCampaign a ex:HarmPattern ;
+    rdfs:label "Genocide Denial Campaign" ;
+    ex:includesHarm ex:Denial, ex:Suppression, ex:Fabrication ;
+    rdfs:comment "Coordinated denial + evidence suppression + counter-narrative fabrication" .
+```
+**Next**: See communal examples below for collective memory modeling
+
+### AI/Psychology: Model Agent Memory
+```turtle
+ex:AgentMemory a ex:Record ;
+    ex:bearer ex:AIAgent ;
+    rdfs:label "Agent's belief about event X" .
+
+ex:BeliefRevision a ex:HarmEvent ;
+    ex:ofType ex:Alteration ;
+    ex:harms ex:AgentMemory ;
+    ex:perpetrator ex:AIAgent ;  # Self-directed
+    ex:severity 3 .
+```
+**Next**: See agent-centric examples below for repression, confabulation, self-deception
+
+---
 
 ## Use Cases
 
@@ -29,6 +99,185 @@ The Record Harm Ontology provides a rigorous taxonomy of how informational recor
 - **Legal/Regulatory**: Compliance with record-keeping requirements
 - **Misinformation Analysis**: Tracking disinformation campaigns and propaganda
 - **Historical Research**: Documenting record manipulation and censorship
+- **Psychological Research**: Modeling memory distortion, repression, and self-deception
+- **Community Governance**: Tracking testimony admission and register integrity
+- **AI Alignment**: Epistemic integrity for AI agents and belief systems
+- **Conflict Studies**: Systematic analysis of information warfare tactics
+
+## Examples: Agent-Centric and Communal Records
+
+The v3.1 revision introduces explicit modeling of **where records live** — inside individual agents (memories, beliefs) or inside communities (registers, archives). This enables representation of harms that were previously inexpressible.
+
+### Agent-Centric (Psychological) Examples
+
+**Repression** — A witness to a traumatic event actively suppresses the memory:
+```turtle
+ex:TraumaMemory a ex:Record ;
+    rdfs:label "Memory of the incident" ;
+    ex:bearer ex:Witness .
+
+ex:RepressionEvent a ex:HarmEvent ;
+    ex:ofType ex:Suppression ;
+    ex:harms ex:TraumaMemory ;
+    ex:perpetrator ex:Witness ;  # Self-directed harm
+    ex:severity 7 .
+```
+The perpetrator and bearer are the same agent — this is **self-directed harm**, newly expressible in v3.1.
+
+**Confabulation** — An agent fabricates a false memory to fill a gap:
+```turtle
+ex:FalseMemory a ex:Record ;
+    rdfs:label "Confabulated memory of approval" ;
+    ex:bearer ex:Executive .
+
+ex:ConfabulationEvent a ex:HarmEvent ;
+    ex:ofType ex:Fabrication ;
+    ex:harms ex:FalseMemory ;
+    ex:perpetrator ex:Executive ;  # Self-directed
+    ex:severity 5 .
+```
+
+**Self-Deception** — An agent denies their own memory to avoid cognitive dissonance:
+```turtle
+ex:InconvenientMemory a ex:Record ;
+    rdfs:label "Memory contradicting self-image" ;
+    ex:bearer ex:Agent .
+
+ex:SelfDeceptionEvent a ex:HarmEvent ;
+    ex:ofType ex:Denial ;
+    ex:harms ex:InconvenientMemory ;
+    ex:perpetrator ex:Agent ;  # Self-directed
+    ex:severity 4 .
+```
+
+**Motivated Forgetting** — Deliberately allowing a memory to decay:
+```turtle
+ex:UnwantedMemory a ex:Record ;
+    ex:bearer ex:Agent .
+
+ex:MotivatedForgettingEvent a ex:HarmEvent ;
+    ex:ofType ex:Destruction ;
+    ex:harms ex:UnwantedMemory ;
+    ex:perpetrator ex:Agent ;  # Self-directed
+    ex:severity 6 .
+```
+
+### Communal Examples
+
+**Parish Register** — A community register as a record composed of individual testimonies:
+```turtle
+ex:ParishRegister a ex:Record ;
+    rdfs:label "Parish baptism register" ;
+    ex:bearer ex:ParishCommunity ;
+    ex:hasElement ex:Testimony1, ex:Testimony2, ex:Testimony3 .
+
+ex:Testimony1 a ex:Record ;
+    rdfs:label "John's testimony of baptism" ;
+    ex:bearer ex:John .
+```
+
+**Refused Testimony** — A community refuses to admit an agent's testimony into the register:
+```turtle
+ex:RefusedTestimony a ex:Record ;
+    rdfs:label "Mary's testimony (refused)" ;
+    ex:bearer ex:Mary .
+
+ex:RefusalEvent a ex:HarmEvent ;
+    ex:ofType ex:Omission ;
+    ex:harms ex:ParishRegister ;  # Omission FROM the register
+    ex:perpetrator ex:ParishClerk ;
+    ex:severity 7 ;
+    rdfs:comment "Mary's testimony was kept out of the register" .
+```
+Note: The harm is to the **register** (which is incomplete), not to Mary's testimony (which remains intact but excluded).
+
+**Collective Memory Suppression** — A community collectively suppresses knowledge of an event:
+```turtle
+ex:CommunityMemory a ex:Record ;
+    rdfs:label "Collective memory of the incident" ;
+    ex:bearer ex:Community1, ex:Community2, ex:Community3 .  # Multiple bearers
+
+ex:CollectiveSuppressionEvent a ex:HarmEvent ;
+    ex:ofType ex:Suppression ;
+    ex:harms ex:CommunityMemory ;
+    ex:perpetrator ex:CommunityLeadership ;
+    ex:severity 8 .
+```
+
+**Archival Fragmentation** — A collection is deliberately scattered across institutions:
+```turtle
+ex:ArchivalCollection a ex:Record ;
+    rdfs:label "Complete correspondence archive" ;
+    ex:hasElement ex:Letter1, ex:Letter2, ex:Letter3 .
+
+ex:FragmentationEvent a ex:HarmEvent ;
+    ex:ofType ex:Fragmentation ;
+    ex:harms ex:ArchivalCollection ;
+    ex:perpetrator ex:Archivist ;
+    ex:severity 6 ;
+    rdfs:comment "Letters dispersed to prevent reconstruction of the full narrative" .
+```
+
+### Key Insight: No New Harm Types Needed
+
+The inside-agent / inside-community distinction required **no new harm types**. Every case maps to an existing prime:
+
+| Scenario | Harm Type | Notes |
+|----------|-----------|-------|
+| Forgetting | Destruction | Memory permanently lost |
+| Confabulation | Fabrication | False memory created |
+| Self-deception | Denial | Agent denies own memory |
+| Repression | Suppression | Memory intact but inaccessible |
+| Refused testimony | Omission | Excluded from community register |
+
+Location is a property of the **record** (`ex:bearer`), not a dimension of harm.
+
+## Bridging Vocabularies: Your Domain → Record Harm
+
+### From InfoSec Terminology
+| You Say | We Say | Why It Matters |
+|---------|--------|----------------|
+| Tampering | Fabrication + Alteration | Distinguishes creating false vs. modifying genuine |
+| DoS | Destruction + Suppression | Permanent loss vs. temporary concealment |
+| Integrity violation | 6 prime harms | Finer granularity for forensic analysis |
+| Chain of custody | ForgeryOfProvenance | Explicit composite harm with dependencies |
+| Evidence spoliation | Destruction + Suppression + Alteration | Pattern-based modeling |
+
+**What's missing**: Confidentiality (deliberate—leaked records are undamaged). Add your own layer if needed.
+
+### From Social Science Terminology
+| You Say | We Say | Why It Matters |
+|---------|--------|----------------|
+| Historical revisionism | Alteration + Omission + Fabrication | Tracks specific manipulation tactics |
+| Propaganda | Fabrication + Contamination | Distinguishes pure fabrication from mixing genuine/false |
+| Censorship | Suppression + Destruction | Separates hiding from erasing |
+| Collective memory | Record with multiple bearers | Explicit community-level modeling |
+| Narrative control | HarmPattern | Captures coordinated campaigns |
+| Genocide denial | Denial + Suppression + Fabrication | Systematic pattern recognition |
+
+**What's new**: Inside-community records (registers, archives) as first-class entities with mereology.
+
+### From AI/Psychology Terminology
+| You Say | We Say | Why It Matters |
+|---------|--------|----------------|
+| Memory distortion | Alteration (inside-agent) | Same harm type, different bearer |
+| Confabulation | Fabrication (self-directed) | perpetrator = bearer |
+| Repression | Suppression (self-directed) | Memory intact but inaccessible |
+| Motivated forgetting | Destruction (self-directed) | Deliberate memory loss |
+| Belief revision | Alteration of belief-record | Beliefs are records with agent bearers |
+| Cognitive dissonance | Denial (self-directed) | Denying one's own memory |
+
+**What's new**: Self-directed harm (perpetrator = bearer) is explicitly representable. No other framework models this.
+
+## Comparison with Other Frameworks
+
+See [docs/ONTOLOGY-COMPARISON.md](docs/ONTOLOGY-COMPARISON.md) for detailed mappings to:
+- **STRIDE** (Microsoft threat modeling)
+- **CIA Triad** (Confidentiality, Integrity, Availability)
+- **InterPARES Diplomatics** (archival authenticity)
+- **Spoliation Doctrine** (legal evidence destruction)
+
+Key differences: Record Harm is **record-centric** (not system-centric), includes **inside-agent records** (memories, beliefs), and models **formal dependencies** between harms.
 
 ## Repository Structure
 
